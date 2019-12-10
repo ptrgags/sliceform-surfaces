@@ -1,5 +1,8 @@
+use std::fs::File;
+use std::io::Write;
+
 #[derive(Debug, Copy, Clone)]
-pub struct Vec2(f64, f64);
+pub struct Vec2(pub f64, pub f64);
 
 impl Vec2 {
     pub fn transform(&self, scale: f64, translate: Self) -> Self {
@@ -35,5 +38,24 @@ impl Polyline {
         Self {
             vertices
         }
+    }
+
+    pub fn write_postscript(&self, file: &mut File) {
+        // Don't write individual points.
+        if self.vertices.len() < 2 {
+            return;
+        }
+
+        writeln!(file, "newpath").expect("Failed to write newpath");
+
+        let Vec2(x, y) = self.vertices[0]; 
+        writeln!(file, "{} {} moveto", x, y).expect("failed to write moveto");
+
+        for vertex in self.vertices[1..].iter() {
+            let Vec2(x, y) = vertex;
+            writeln!(file, "{} {} lineto", x, y)
+                .expect("failed to write lineto");
+        }
+        writeln!(file, "stroke").expect("failed to write stroke");
     }
 }

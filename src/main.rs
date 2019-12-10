@@ -1,5 +1,9 @@
 mod polylines;
 
+use std::fs::File;
+
+use polylines::{Vec2, Polyline};
+
 fn make_intervals(max_depth: u32, include_endpoints: bool) -> Vec<f64> {
     let mut result = vec![];
     
@@ -33,4 +37,10 @@ fn intervals(left: f64, right: f64, depth: u32, max_depth: u32) -> Vec<f64> {
 fn main() {
     println!("{:?}", make_intervals(3, true));
     println!("{:?}", make_intervals(3, false));
+
+    let points = vec![Vec2(10.0, 10.0), Vec2(100.0, 10.0), Vec2(100.0, 100.0)];
+    let poly = Polyline::new(&points, false);
+
+    let mut file = File::create("test.ps").expect("Could not open file");
+    poly.write_postscript(&mut file);
 }
