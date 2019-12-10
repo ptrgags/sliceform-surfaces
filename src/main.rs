@@ -1,8 +1,8 @@
 mod polylines;
+mod printer;
 
-use std::fs::File;
-
-use polylines::{Vec2, Polyline};
+use polylines::{Vec2, Polyline, Slice};
+use printer::Printer;
 
 fn make_intervals(max_depth: u32, include_endpoints: bool) -> Vec<f64> {
     let mut result = vec![];
@@ -41,7 +41,7 @@ fn product(x: f64, y: f64) -> f64 {
 }
 
 fn x_slices(surf: Surface, slice_resolution: u32, curve_resolution: u32) 
-        -> Vec<Vec<Polyline>> {
+        -> Vec<Slice> {
     make_intervals(slice_resolution, false).into_iter().map(|y0| {
         x_slice(surf, y0, slice_resolution, curve_resolution) 
     }).collect()
@@ -49,7 +49,7 @@ fn x_slices(surf: Surface, slice_resolution: u32, curve_resolution: u32)
 
 fn x_slice(
         surf: Surface, y0: f64, slice_resolution: u32, curve_resolution: u32) 
-        -> Vec<Polyline> {
+        -> Slice {
     let mut outline_vertices = vec![Vec2(0.0, 0.0), Vec2(1.0, 0.0)]; 
     for x in make_intervals(curve_resolution, true).into_iter().rev() {
         let height = surf(x, y0);
@@ -68,14 +68,12 @@ fn x_slice(
         slits.push(slit);
     }
 
-    let mut result = vec![outline];
-    result.append(&mut slits);
 
-    result
+    Slice::new(outline, slits)
 }
 
 fn y_slices(surf: Surface, slice_resolution: u32, curve_resolution: u32) 
-        -> Vec<Vec<Polyline>> {
+        -> Vec<Slice> {
     make_intervals(slice_resolution, false).into_iter().map(|x0| {
         y_slice(surf, x0, slice_resolution, curve_resolution) 
     }).collect()
@@ -83,7 +81,7 @@ fn y_slices(surf: Surface, slice_resolution: u32, curve_resolution: u32)
 
 fn y_slice(
         surf: Surface, x0: f64, slice_resolution: u32, curve_resolution: u32) 
-        -> Vec<Polyline> {
+        -> Slice {
     let mut outline_vertices = vec![Vec2(0.0, 0.0), Vec2(1.0, 0.0)]; 
     for y in make_intervals(curve_resolution, true).into_iter() {
         let height = surf(x0, y);
@@ -102,32 +100,23 @@ fn y_slice(
         slits.push(slit);
     }
 
-    let mut result = vec![outline];
-    result.append(&mut slits);
-
-    result
+    Slice::new(outline, slits)
 }
 
 fn main() {
-    let mut file = File::create("test.ps").expect("Could not open file");
+    let mut printer = Printer::new("slicetest.ps", 2.0, false);
 
-    let slices = x_slices(product, 1, 6);
-    let dpi = 72.0;
-    let margin = dpi / 2.0;
-    for (i, slice) in slices.into_iter().enumerate() {
-        let translate = Vec2(margin, (i as f64) * 2.0 * dpi + margin);
-        for poly in slice {
-            poly.transform(2.0 * dpi, translate).write_postscript(&mut file);
-        }
+    let slices = x_slices(product, 5, 6);
+    for slice in slices.iter() {
+        printer.print_slice(slice);
     }
 
-    let slices = y_slices(product, 1, 6);
-    let dpi = 72.0;
-    let margin = dpi / 2.0;
-    for (i, slice) in slices.into_iter().enumerate() {
-        let translate = Vec2(3.0 * dpi + margin, (i as f64) * 2.0 * dpi + margin);
-        for poly in slice {
-            poly.transform(2.0 * dpi, translate).write_postscript(&mut file);
-        }
+    printer.next_page();
+
+    let slices = y_slices(product, 5, 6);
+    for slice in slices.iter() {
+        printer.print_slice(slice);
     }
+
+    printer.next_page();
 }
