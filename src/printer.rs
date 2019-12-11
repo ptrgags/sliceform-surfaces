@@ -41,7 +41,7 @@ impl Printer {
 
     pub fn next_page(&mut self) {
         writeln!(self.file, "showpage").expect("could not write showpage");
-        writeln!(self.file, "0 0 1 setrgbcolor").expect("Could not set color");
+        //writeln!(self.file, "0 0 1 setrgbcolor").expect("Could not set color");
         self.cursor = Vec2(Self::MARGIN, Self::MARGIN);
     }
 
@@ -53,7 +53,7 @@ impl Printer {
     }
 
     pub fn init(&mut self) {
-        writeln!(self.file, "0 0 1 setrgbcolor").expect("Could not set color");
+        //writeln!(self.file, "0 0 1 setrgbcolor").expect("Could not set color");
     }
 
     pub fn print_slice(&mut self, slice: &Slice) {
