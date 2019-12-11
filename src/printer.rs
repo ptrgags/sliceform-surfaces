@@ -41,6 +41,7 @@ impl Printer {
 
     pub fn next_page(&mut self) {
         writeln!(self.file, "showpage").expect("could not write showpage");
+        writeln!(self.file, "0 0 1 setrgbcolor").expect("Could not set color");
         self.cursor = Vec2(Self::MARGIN, Self::MARGIN);
     }
 
@@ -51,6 +52,10 @@ impl Printer {
         self.next_row(&slice.get_bbox());
     }
 
+    pub fn init(&mut self) {
+        writeln!(self.file, "0 0 1 setrgbcolor").expect("Could not set color");
+    }
+
     pub fn print_slice(&mut self, slice: &Slice) {
         let scaled = slice.scale(self.scale * Self::INCH);
         let bbox = scaled.get_bbox();
@@ -58,7 +63,7 @@ impl Printer {
 
         if y + bbox.height() <= Self::HEIGHT - Self::MARGIN {
             self.draw_slice_at_cursor(&scaled);
-        } else if x + bbox.width() <= Self::WIDTH - Self::MARGIN {
+        } else if x + 2.0 * bbox.width() <= Self::WIDTH - Self::MARGIN {
             self.next_column(&bbox);
             self.draw_slice_at_cursor(&scaled);
         } else {
