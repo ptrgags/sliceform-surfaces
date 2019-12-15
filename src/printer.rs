@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::Write;
 
 use crate::polylines::{Vec2, BBox, Slice};
+use crate::slicer::Slicer;
 
 pub struct Printer {
     cursor: Vec2,
@@ -70,5 +71,21 @@ impl Printer {
             self.next_page();
             self.draw_slice_at_cursor(&scaled);
         }
+    }
+
+    pub fn print_slices(&mut self, slicer: &Slicer) {
+        self.init();
+
+        for slice in slicer.make_x_slices().iter() {
+            self.print_slice(slice);
+        }
+
+        self.next_page();
+
+        for slice in slicer.make_y_slices().iter() {
+            self.print_slice(slice);
+        }
+
+        self.next_page();
     }
 }
