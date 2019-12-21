@@ -10,9 +10,9 @@ use printer::Printer;
 use slicer::Slicer;
 
 fn main() {
-    let surf = models::select_model("step_hill");
+    let surf = models::select_model("crater_diamond");
     let slicer = Slicer::new(2, 6, surf);
 
-    let mut printer = Printer::new("slicetest.ps", 3.0, false);
+    let mut printer = Printer::new("slicetest.ps", 2.5, false);
     printer.print_slices(&slicer);
 }

@@ -1,24 +1,39 @@
 use crate::heights::{Height1D, Height2D};
 use crate::surfaces::SurfaceOfRevolution;
 use crate::polynomial::Polynomial;
+use crate::surfaces::DistanceMetric;
 
 fn crater_hill() -> SurfaceOfRevolution {
     let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]);
 
-    SurfaceOfRevolution::new(Box::new(poly))
+    SurfaceOfRevolution::new(Box::new(poly), DistanceMetric::Euclidean)
+}
+
+fn crater_diamond() -> SurfaceOfRevolution {
+    let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]);
+
+    SurfaceOfRevolution::new(Box::new(poly), DistanceMetric::Manhattan)
 }
 
 fn step_hill() -> SurfaceOfRevolution {
     let step_func = HeightFunction::new(steps);
     
-    SurfaceOfRevolution::new(Box::new(step_func))
+    SurfaceOfRevolution::new(Box::new(step_func), DistanceMetric::Euclidean)
+}
+
+fn sinc_box() -> SurfaceOfRevolution {
+    let sinc_func = HeightFunction::new(sinc);
+
+    SurfaceOfRevolution::new(Box::new(sinc_func), DistanceMetric::Chessboard)
 }
 
 pub fn select_model(name: &str) -> Box<dyn Height2D> {
     match name {
         "crater_hill" => Box::new(crater_hill()),
+        "crater_diamond" => Box::new(crater_diamond()),
         "step_hill" => Box::new(step_hill()),
-        _ => panic!("valid models: crater_hill")
+        "sinc_box" => Box::new(sinc_box()),
+        _ => panic!("valid models: crater_hill, step_hill, sinc_box")
     }
 }
 
@@ -50,6 +65,14 @@ fn scaled_t(t: f64, t0: f64, t1: f64) -> f64 {
 
 fn lerp_heights(a: f64, b: f64, t: f64, t0: f64, t1: f64) -> f64 {
     lerp(a, b, scaled_t(t, t0, t1))
+}
+
+fn sinc(r: f64) -> f64 {
+    if r == 0.0 {
+        5.0 / 8.0 + 0.35
+    } else {
+        5.0 / 8.0 * (10.0 * r).sin() + 0.35
+    }
 }
 
 fn steps(r: f64) -> f64 {
