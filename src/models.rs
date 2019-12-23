@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use crate::heights::{Height1D, Height2D};
 use crate::surfaces::SurfaceOfRevolution;
 use crate::polynomial::Polynomial;
@@ -27,13 +29,37 @@ fn sinc_box() -> SurfaceOfRevolution {
     SurfaceOfRevolution::new(Box::new(sinc_func), DistanceMetric::Chessboard)
 }
 
+
 pub fn select_model(name: &str) -> Box<dyn Height2D> {
     match name {
         "crater_hill" => Box::new(crater_hill()),
         "crater_diamond" => Box::new(crater_diamond()),
         "step_hill" => Box::new(step_hill()),
         "sinc_box" => Box::new(sinc_box()),
+        "sine_hill" => Box::new(SineHill::new()),
         _ => panic!("valid models: crater_hill, step_hill, sinc_box")
+    }
+}
+
+pub struct SineHill {}
+
+impl SineHill {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+impl Height2D for SineHill {
+    fn compute(&self, x: f64, y: f64) -> f64 {
+        const FREQ: f64 = 1.58;
+        const PHASE: f64 = 2.0;
+        let sine = 0.5 + 0.25 * (2.0 * PI * FREQ * x - PHASE).sin();
+
+        const SHARPNESS:f64 = 6.0;
+        let shifted = y - 0.5;
+        let hill = (-SHARPNESS * shifted * shifted).exp();
+
+        sine * hill
     }
 }
 
