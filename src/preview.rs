@@ -59,14 +59,7 @@ impl SurfacePreview {
 
         self.create_top_faces();
         self.create_bottom_faces();
-
-        /*
-        self.create_faces(&mut self.bottom, Vec3(0.0, 0.0, -1.0));
-        self.create_faces(&mut self.front, Vec3(0.0, -1.0, 0.0));
-        self.create_faces(&mut self.right, Vec3(1.0, 0.0, 0.0));
-        self.create_faces(&mut self.back, Vec3(0.0, 1.0, 0.0));
-        self.create_faces(&mut self.left, Vec3(-1.0, 0.0, 0.0));
-        */
+        self.create_front_faces();
     }
 
     fn to_coordinate(index: usize, max: usize) -> f64 {
@@ -92,6 +85,24 @@ impl SurfacePreview {
                 self.top[idx] = Some(vertex_index);
             }
         }
+
+        // Update the front face
+        for i in 0..self.width { 
+            let src_idx = Self::to_index_1d(i, 0, self.width);
+            let vert_idx = self.top[src_idx].unwrap();
+            let dst_idx = Self::to_index_1d(i, self.height - 1, self.width);
+            
+            self.front[dst_idx] = Some(vert_idx);
+        }
+
+        // Update the back face
+        for i in 0..self.width { 
+            let src_idx = Self::to_index_1d(self.width - 1 - i, 0, self.width);
+            let vert_idx = self.top[src_idx].unwrap();
+            let dst_idx = Self::to_index_1d(i, self.height - 1, self.width);
+            
+            self.back[dst_idx] = Some(vert_idx);
+        }
     }
     
     fn populate_bottom(&mut self) {
@@ -106,6 +117,15 @@ impl SurfacePreview {
                 let idx = Self::to_index_1d(i, j, self.width);
                 self.bottom[idx] = Some(vertex_index);
             }
+        }
+
+        // Update the front face
+        for i in 0..self.width { 
+            let src_idx = Self::to_index_1d(i, self.length - 1, self.width);
+            let vert_idx = self.bottom[src_idx].unwrap();
+            let dst_idx = Self::to_index_1d(i, 0, self.width);
+            
+            self.front[dst_idx] = Some(vert_idx);
         }
     }
 
@@ -140,6 +160,15 @@ impl SurfacePreview {
                 let idx = Self::to_index_1d(i, j, self.width);
                 self.right[idx] = Some(vertex_index);
             }
+        }
+
+        // Populate last row of front face
+        for j in 1..(self.height - 1) {
+            let src_idx = Self::to_index_1d(0, j, self.length);
+            let vert_idx = self.right[src_idx].unwrap();
+            let dst_idx = Self::to_index_1d(self.width - 1, j, self.width);
+            
+            self.front[dst_idx] = Some(vert_idx);
         }
     }
  
@@ -211,6 +240,31 @@ impl SurfacePreview {
                 let v2 = self.bottom[idx2].expect("Missing vertex");
                 let v3 = self.bottom[idx3].expect("Missing vertex");
                 let v4 = self.bottom[idx4].expect("Missing vertex");
+
+                let tri1 = Face::new(v1, v2, v3, normal_idx);
+                let tri2 = Face::new(v1, v3, v4, normal_idx); 
+
+                self.mesh.add_face(tri1);
+                self.mesh.add_face(tri2);
+            }
+        }
+    }
+
+    fn create_front_faces(&mut self) {
+        let normal = Vec3(0.0, -1.0, 0.0);
+        let normal_idx = self.mesh.add_normal(normal);
+
+        for i in 0..(self.width - 1) {
+            for j in 0..(self.height - 1) {
+                let idx1 = Self::to_index_1d(i, j, self.width);
+                let idx2 = Self::to_index_1d(i + 1, j, self.width);
+                let idx3 = Self::to_index_1d(i + 1, j + 1, self.width);
+                let idx4 = Self::to_index_1d(i, j + 1, self.width);
+
+                let v1 = self.front[idx1].expect("Missing vertex");
+                let v2 = self.front[idx2].expect("Missing vertex");
+                let v3 = self.front[idx3].expect("Missing vertex");
+                let v4 = self.front[idx4].expect("Missing vertex");
 
                 let tri1 = Face::new(v1, v2, v3, normal_idx);
                 let tri2 = Face::new(v1, v3, v4, normal_idx); 
