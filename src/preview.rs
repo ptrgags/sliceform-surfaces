@@ -33,31 +33,31 @@ impl SurfacePreview {
         (0..(width * height)).map(|_| None).collect()
     }
 
-    pub fn new(M: usize, N: usize, P: usize, surf: Box<dyn Height2D>) -> Self {
+    pub fn new(m: usize, n: usize, p: usize, surf: Box<dyn Height2D>) -> Self {
         Self {
             mesh: Mesh::new(),
-            width: M,
-            length: N,
-            height: P,
-            top: Self::allocate_slots(M, N),
-            bottom: Self::allocate_slots(M, N),
-            front: Self::allocate_slots(M, P),
-            right: Self::allocate_slots(N, P),
-            back: Self::allocate_slots(M, P),
-            left: Self::allocate_slots(N, P),
+            width: m,
+            length: n,
+            height: p,
+            top: Self::allocate_slots(m, n),
+            bottom: Self::allocate_slots(m, n),
+            front: Self::allocate_slots(m, p),
+            right: Self::allocate_slots(n, p),
+            back: Self::allocate_slots(m, p),
+            left: Self::allocate_slots(n, p),
             surf,
         }
     }
 
     pub fn generate_mesh(&mut self) {
         self.populate_top();
-        /*
         self.populate_bottom();
         self.populate_front();
         self.populate_right();
         self.populate_back();
         self.populate_left();
 
+        /*
         self.create_top_faces();
         self.create_faces(&mut self.bottom, Vec3(0.0, 0.0, -1.0));
         self.create_faces(&mut self.front, Vec3(0.0, -1.0, 0.0));
@@ -93,18 +93,86 @@ impl SurfacePreview {
     }
     
     fn populate_bottom(&mut self) {
+        let z = 0.0;
+        for i in 0..self.width {
+            let x = Self::to_coordinate(i, self.width);
+            for j in 0..self.length {
+                let y = Self::to_coordinate(self.length - 1 - j, self.length);
+
+                let vertex = Vec3(x, y, z);
+                let vertex_index = self.mesh.add_vertex(vertex);
+                let idx = Self::to_index_1d(i, j, self.width);
+                self.bottom[idx] = Some(vertex_index);
+            }
+        }
     }
 
     fn populate_front(&mut self) {
+        let y = 0.0;
+        for i in 0..(self.width - 1) {
+            let x = Self::to_coordinate(i, self.width);
+            let h = self.surf.compute_clamped(x, y);
+            for j in 1..(self.height - 1) {
+                let factor = Self::to_coordinate(j, self.height);
+                let z = factor * h;
+
+                let vertex = Vec3(x, y, z);
+                let vertex_index = self.mesh.add_vertex(vertex);
+                let idx = Self::to_index_1d(i, j, self.width);
+                self.front[idx] = Some(vertex_index);
+            }
+        }
     }
 
     fn populate_right(&mut self) {
+        let x = 1.0;
+        for i in 0..(self.length - 1) {
+            let y = Self::to_coordinate(i, self.width);
+            let h = self.surf.compute_clamped(x, y);
+            for j in 1..(self.height - 1) {
+                let factor = Self::to_coordinate(j, self.height);
+                let z = factor * h;
+
+                let vertex = Vec3(x, y, z);
+                let vertex_index = self.mesh.add_vertex(vertex);
+                let idx = Self::to_index_1d(i, j, self.width);
+                self.right[idx] = Some(vertex_index);
+            }
+        }
     }
  
     fn populate_back(&mut self) {
+        let y = 1.0;
+        for i in 0..(self.width - 1) {
+            let x = Self::to_coordinate(self.width - 1 - i, self.width);
+            let h = self.surf.compute_clamped(x, y);
+            for j in 1..(self.height - 1) {
+                let factor = Self::to_coordinate(j, self.height);
+                let z = factor * h;
+
+                let vertex = Vec3(x, y, z);
+                let vertex_index = self.mesh.add_vertex(vertex);
+                let idx = Self::to_index_1d(i, j, self.width);
+                self.back[idx] = Some(vertex_index);
+            }
+        }
     }
 
     fn populate_left(&mut self) {
+        let x = 0.0;
+        for i in 0..(self.length - 1) {
+            let y = Self::to_coordinate(self.length - 1 - i, self.width);
+            let h = self.surf.compute_clamped(x, y);
+            for j in 1..(self.height - 1) {
+                let factor = Self::to_coordinate(j, self.height);
+                let z = factor * h;
+
+                let vertex = Vec3(x, y, z);
+                let vertex_index = self.mesh.add_vertex(vertex);
+                let idx = Self::to_index_1d(i, j, self.width);
+                self.left[idx] = Some(vertex_index);
+            }
+        }
     }
 
     fn create_top_faces(&mut self) {

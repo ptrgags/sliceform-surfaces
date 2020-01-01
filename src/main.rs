@@ -22,7 +22,7 @@ fn main() {
     const PS_FNAME: &str = "slicetest.ps";
     const M: usize = 20;
     const N: usize = 20;
-    const P: usize = 10;
+    const P: usize = 5;
     const OBJ_FILE: &str = "preview.obj";
 
     let surf = models::select_model(MODEL);
