@@ -1,7 +1,8 @@
 use std::fs::File;
 use std::io::Write;
 
-use crate::polylines::{Vec2, BBox, Slice};
+use crate::geom::Vec2;
+use crate::polylines::{BBox, Slice};
 use crate::slicer::Slicer;
 
 pub struct Printer {

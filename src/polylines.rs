@@ -1,23 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 
-#[derive(Debug, Copy, Clone)]
-pub struct Vec2(pub f64, pub f64);
-
-impl Vec2 {
-    pub fn translate(&self, amount: Self) -> Self {
-        let Self(x, y) = self;
-        let Self(dx, dy) = amount;
-
-        Self(x + dx, y + dy)
-    }
-
-    pub fn scale(&self, factor: f64) -> Self {
-        let Self(x, y) = self;
-
-        Self(x * factor, y * factor)
-    }
-}
+use crate::geom::Vec2;
 
 pub struct BBox {
     left: f64,

@@ -1,5 +1,6 @@
 use crate::heights::Height2D;
-use crate::polylines::{Vec2, Polyline, Slice};
+use crate::geom::Vec2;
+use crate::polylines::{Polyline, Slice};
 
 pub struct Slicer {
     slice_res: u32,
