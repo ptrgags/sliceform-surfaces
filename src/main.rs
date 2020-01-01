@@ -20,9 +20,9 @@ fn main() {
     const SLICE_WIDTH_INCHES: f64 = 3.0;
     const DRAW_BBOXES: bool = false;
     const PS_FNAME: &str = "slicetest.ps";
-    const M: usize = 20;
-    const N: usize = 20;
-    const P: usize = 5;
+    const M: usize = 50;
+    const N: usize = 50;
+    const P: usize = 10;
     const OBJ_FILE: &str = "preview.obj";
 
     let surf = models::select_model(MODEL);
