@@ -24,10 +24,10 @@ impl Face {
         writeln!(
             file, 
             "f {0}//{3} {1}//{3} {2}//{3}", 
-            self.v1, 
-            self.v2, 
-            self.v3, 
-            self.normal).expect("Failed to write face");
+            self.v1 + 1, 
+            self.v2 + 1, 
+            self.v3 + 1, 
+            self.normal + 1).expect("Failed to write face");
     }
 }
 
@@ -60,11 +60,21 @@ impl Mesh {
         index
     }
 
-    pub fn add_face(&mut self, face: Face) -> usize {
-        let index = self.faces.len();
+    pub fn add_face(&mut self, face: Face) {
         self.faces.push(face);
+    }
 
-        index
+    pub fn add_triangle(&mut self, v1: usize, v2: usize, v3: usize) {
+        let pos1 = self.vertices[v1];
+        let pos2 = self.vertices[v2];
+        let pos3 = self.vertices[v3];
+        let tri = Triangle(pos1, pos2, pos3);
+
+        let normal = tri.compute_normal().normalize();
+        let normal_idx = self.add_normal(normal);
+        
+        let face = Face::new(v1, v2, v3, normal_idx);
+        self.add_face(face);
     }
     
     pub fn save_obj_file(&self, fname: &str) {

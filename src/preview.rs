@@ -1,4 +1,4 @@
-use crate::mesh::Mesh;
+use crate::mesh::{Mesh, Face};
 use crate::heights::Height2D;
 use crate::geom::Vec3;
 
@@ -57,8 +57,10 @@ impl SurfacePreview {
         self.populate_back();
         self.populate_left();
 
-        /*
         self.create_top_faces();
+        self.create_bottom_faces();
+
+        /*
         self.create_faces(&mut self.bottom, Vec3(0.0, 0.0, -1.0));
         self.create_faces(&mut self.front, Vec3(0.0, -1.0, 0.0));
         self.create_faces(&mut self.right, Vec3(1.0, 0.0, 0.0));
@@ -176,9 +178,47 @@ impl SurfacePreview {
     }
 
     fn create_top_faces(&mut self) {
+        for i in 0..(self.width - 1) {
+            for j in 0..(self.length - 1) {
+                let idx1 = Self::to_index_1d(i, j, self.width);
+                let idx2 = Self::to_index_1d(i + 1, j, self.width);
+                let idx3 = Self::to_index_1d(i + 1, j + 1, self.width);
+                let idx4 = Self::to_index_1d(i, j + 1, self.width);
+
+                let v1 = self.top[idx1].expect("Missing vertex");
+                let v2 = self.top[idx2].expect("Missing vertex");
+                let v3 = self.top[idx3].expect("Missing vertex");
+                let v4 = self.top[idx4].expect("Missing vertex");
+
+                self.mesh.add_triangle(v1, v2, v3);
+                self.mesh.add_triangle(v1, v3, v4);
+            }
+        }
     }
 
-    fn create_faces(&mut self, side: &mut Vec<VertexSlot>, normal: Vec3) {
+    fn create_bottom_faces(&mut self) {
+        let normal = Vec3(0.0, 0.0, -1.0);
+        let normal_idx = self.mesh.add_normal(normal);
+
+        for i in 0..(self.width - 1) {
+            for j in 0..(self.length - 1) {
+                let idx1 = Self::to_index_1d(i, j, self.width);
+                let idx2 = Self::to_index_1d(i + 1, j, self.width);
+                let idx3 = Self::to_index_1d(i + 1, j + 1, self.width);
+                let idx4 = Self::to_index_1d(i, j + 1, self.width);
+
+                let v1 = self.bottom[idx1].expect("Missing vertex");
+                let v2 = self.bottom[idx2].expect("Missing vertex");
+                let v3 = self.bottom[idx3].expect("Missing vertex");
+                let v4 = self.bottom[idx4].expect("Missing vertex");
+
+                let tri1 = Face::new(v1, v2, v3, normal_idx);
+                let tri2 = Face::new(v1, v3, v4, normal_idx); 
+
+                self.mesh.add_face(tri1);
+                self.mesh.add_face(tri2);
+            }
+        }
     }
 
     pub fn save_obj_file(&self, fname: &str) {

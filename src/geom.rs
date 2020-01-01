@@ -39,6 +39,20 @@ impl Vec3 {
 
         Self(x, y, z)
     }
+
+    pub fn length(&self) -> f64 {
+        let Self(x, y, z) = self;
+
+        (x * x + y * y + z * z).sqrt()
+    }
+
+    pub fn normalize(&self) -> Self {
+        let Self(x, y, z) = self;
+        
+        let len = self.length();
+
+        Self(x / len, y / len, z / len)
+    }
 }
 
 impl<'a, 'b> Sub<&'b Vec3> for &'a Vec3 {
@@ -56,7 +70,7 @@ impl<'a, 'b> Sub<&'b Vec3> for &'a Vec3 {
 pub struct Triangle(pub Vec3, pub Vec3, pub Vec3);
 
 impl Triangle {
-    fn compute_normal(&self) -> Vec3 {
+    pub fn compute_normal(&self) -> Vec3 {
         let Self(v1, v2, v3) = self;
         let ab = v2 - v1;
         let ac = v3 - v1;
