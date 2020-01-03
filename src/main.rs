@@ -14,10 +14,10 @@ use slicer::Slicer;
 use preview::SurfacePreview;
 
 fn main() {
-    const MODEL: &str = "sine_hill";
+    const MODEL: &str = "nine_peak";
     const SLICE_RES: u32 = 2;
     const CURVE_RES: u32 = 6;
-    const SLICE_WIDTH_INCHES: f64 = 3.0;
+    const SLICE_WIDTH_INCHES: f64 = 2.5;
     const DRAW_BBOXES: bool = false;
     const PS_FNAME: &str = "slicetest.ps";
     const M: usize = 50;

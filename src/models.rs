@@ -1,34 +1,57 @@
-use std::f64::consts::PI;
-
-use crate::heights::{Height1D, Height2D};
-use crate::surfaces::SurfaceOfRevolution;
+use crate::heights::Height2D;
+use crate::surfaces::{
+    SurfaceOfRevolution, 
+    DistanceMetric, 
+    SineHill, 
+    HeightFunction,
+    ProductSurface,
+};
 use crate::polynomial::Polynomial;
-use crate::surfaces::DistanceMetric;
 
 fn crater_hill() -> SurfaceOfRevolution {
     let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]);
-
     SurfaceOfRevolution::new(Box::new(poly), DistanceMetric::Euclidean)
 }
 
 fn crater_diamond() -> SurfaceOfRevolution {
     let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]);
-
     SurfaceOfRevolution::new(Box::new(poly), DistanceMetric::Manhattan)
 }
 
 fn step_hill() -> SurfaceOfRevolution {
     let step_func = HeightFunction::new(steps);
-    
     SurfaceOfRevolution::new(Box::new(step_func), DistanceMetric::Euclidean)
 }
 
 fn sinc_box() -> SurfaceOfRevolution {
     let sinc_func = HeightFunction::new(sinc);
-
     SurfaceOfRevolution::new(Box::new(sinc_func), DistanceMetric::Chessboard)
 }
 
+fn peak_rings() -> SurfaceOfRevolution {
+    let peak_func = HeightFunction::new(double_peak);
+    SurfaceOfRevolution::new(Box::new(peak_func), DistanceMetric::Chessboard)
+}
+
+fn hill(x: f64) -> f64 {
+    let y = x - 0.5;
+    1.0 - 3.0 * y * y
+}
+
+fn peak_thing() -> ProductSurface {
+    let peak_func = double_peak;
+    let hill_func = hill;
+
+    ProductSurface::new(peak_func, hill_func)
+}
+
+fn quad_peak() -> ProductSurface {
+    ProductSurface::new(double_peak, double_peak)
+}
+
+fn nine_peak() -> ProductSurface {
+    ProductSurface::new(triple_peak, triple_peak)
+}
 
 pub fn select_model(name: &str) -> Box<dyn Height2D> {
     match name {
@@ -37,47 +60,11 @@ pub fn select_model(name: &str) -> Box<dyn Height2D> {
         "step_hill" => Box::new(step_hill()),
         "sinc_box" => Box::new(sinc_box()),
         "sine_hill" => Box::new(SineHill::new()),
+        "peak_rings" => Box::new(peak_rings()),
+        "peak_thing" => Box::new(peak_thing()),
+        "quad_peak" => Box::new(quad_peak()),
+        "nine_peak" => Box::new(nine_peak()),
         _ => panic!("valid models: crater_hill, step_hill, sinc_box")
-    }
-}
-
-pub struct SineHill {}
-
-impl SineHill {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
-impl Height2D for SineHill {
-    fn compute(&self, x: f64, y: f64) -> f64 {
-        const FREQ: f64 = 1.58;
-        const PHASE: f64 = 2.0;
-        let sine = 0.5 + 0.25 * (2.0 * PI * FREQ * x - PHASE).sin();
-
-        const SHARPNESS:f64 = 6.0;
-        let shifted = y - 0.5;
-        let hill = (-SHARPNESS * shifted * shifted).exp();
-
-        sine * hill
-    }
-}
-
-pub struct HeightFunction {
-    height: fn(f64) -> f64
-}
-
-impl HeightFunction {
-    pub fn new(height: fn(f64) -> f64) -> Self {
-        Self {
-            height
-        }
-    }
-}
-
-impl Height1D for HeightFunction {
-    fn compute(&self, x: f64) -> f64 {
-        (self.height)(x)
     }
 }
 
@@ -121,4 +108,30 @@ fn steps(r: f64) -> f64 {
     } else {
         0.2
     }
+}
+
+fn peak(x: f64, n: f64) -> f64 {
+    let exponent = -n * x.abs();
+    exponent.exp()
+}
+
+fn double_peak(x: f64) -> f64 {
+    const A: f64 = 0.25;
+    const B: f64 = 0.75;
+    const C: f64 = 0.9;
+    const D: f64 = 0.7;
+    const N: f64 = 3.8;
+
+    C * peak(x - A, N) + D * peak(x - B, N)
+}
+
+fn triple_peak(x: f64) -> f64 {
+    const A: f64 = 0.25;
+    const B: f64 = 0.5; 
+    const C: f64 = 0.75;
+
+    const D: f64 = 0.4;
+    const E: f64 = 0.9;
+    const N: f64 = 10.0;
+    1.2 * (D * peak(x - A, N) + E * peak(x - B, N) + D * peak(x - C, N))
 }
