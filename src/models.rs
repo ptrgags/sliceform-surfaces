@@ -57,10 +57,6 @@ fn nine_tines() -> ProductSurface {
     ProductSurface::new(fork, fork)
 }
 
-fn nine_tines_complement() -> ProductSurface {
-    ProductSurface::new(fork_complement, fork_complement)
-}
-
 pub fn select_model(name: &str) -> Box<dyn Height2D> {
     match name {
         "crater_hill" => Box::new(crater_hill()),
@@ -73,7 +69,6 @@ pub fn select_model(name: &str) -> Box<dyn Height2D> {
         "quad_peak" => Box::new(quad_peak()),
         "nine_peak" => Box::new(nine_peak()),
         "nine_tines" => Box::new(nine_tines()),
-        "nine_tines_complement" => Box::new(nine_tines_complement()),
         _ => panic!("valid models: crater_hill, step_hill, sinc_box")
     }
 }
@@ -152,15 +147,10 @@ fn fork(x: f64) -> f64 {
     const X1: f64 = 0.1;
     const X2: f64 = 0.5;
     const X3: f64 = 0.9;
-    const A: f64 = 0.75;
 
-    let f1 = A * peak(x - X1, N1);
-    let f2 = A * peak(x - X2, N2);
-    let f3 = A * peak(x - X3, N1);
+    let f1 = peak(x - X1, N1);
+    let f2 = peak(x - X2, N2);
+    let f3 = peak(x - X3, N1);
     
     f1.max(f2).max(f3)
-}
-
-fn fork_complement(x: f64) -> f64 {
-    1.0 - fork(x)
 }

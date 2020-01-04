@@ -14,7 +14,7 @@ use slicer::Slicer;
 use preview::SurfacePreview;
 
 fn main() {
-    const MODEL: &str = "nine_tines_complement";
+    const MODEL: &str = "nine_tines";
     const SLICE_RES: u32 = 2;
     const CURVE_RES: u32 = 6;
     const SLICE_WIDTH_INCHES: f64 = 2.5;
