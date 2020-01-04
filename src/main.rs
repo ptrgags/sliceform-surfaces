@@ -14,14 +14,14 @@ use slicer::Slicer;
 use preview::SurfacePreview;
 
 fn main() {
-    const MODEL: &str = "nine_peak";
+    const MODEL: &str = "nine_tines_complement";
     const SLICE_RES: u32 = 2;
     const CURVE_RES: u32 = 6;
     const SLICE_WIDTH_INCHES: f64 = 2.5;
     const DRAW_BBOXES: bool = false;
     const PS_FNAME: &str = "slicetest.ps";
-    const M: usize = 50;
-    const N: usize = 50;
+    const M: usize = 100;
+    const N: usize = 100;
     const P: usize = 10;
     const OBJ_FILE: &str = "preview.obj";
 
