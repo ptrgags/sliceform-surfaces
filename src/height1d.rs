@@ -45,7 +45,7 @@ fn sinc(x: f64) -> f64 {
     }
 }
 
-fn get_primitive(name: &str) -> Box<dyn Height1D> {
+pub fn get_primitive(name: &str) -> Box<dyn Height1D> {
     let func = match name {
         "peak" => peak,
         "sin" => sin,

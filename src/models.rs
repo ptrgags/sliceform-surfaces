@@ -1,11 +1,16 @@
 use crate::heights::Height2D;
 use crate::surfaces::{
+    SineHill, 
+};
+use crate::height1d::{HeightFunction1D, get_primitive};
+use crate::xforms1d::Linear1D;
+use crate::csg1d::Union1D;
+use crate::csg2d::Complement2D;
+use crate::combine::{
+    ProductSurface,
     SurfaceOfRevolution, 
     DistanceMetric, 
-    SineHill, 
-    ProductSurface,
 };
-use crate::height1d::HeightFunction1D;
 use crate::polynomial::Polynomial;
 
 fn crater_hill() -> SurfaceOfRevolution {
@@ -19,18 +24,18 @@ fn crater_diamond() -> SurfaceOfRevolution {
 }
 
 fn step_hill() -> SurfaceOfRevolution {
-    let step_func = HeightFunction1D::new(steps);
-    SurfaceOfRevolution::new(Box::new(step_func), DistanceMetric::Euclidean)
+    let step_func = HeightFunction1D::new(steps).to_box();
+    SurfaceOfRevolution::new(step_func, DistanceMetric::Euclidean)
 }
 
 fn sinc_box() -> SurfaceOfRevolution {
-    let sinc_func = HeightFunction1D::new(sinc);
-    SurfaceOfRevolution::new(Box::new(sinc_func), DistanceMetric::Chessboard)
+    let sinc_func = HeightFunction1D::new(sinc).to_box();
+    SurfaceOfRevolution::new(sinc_func, DistanceMetric::Chessboard)
 }
 
 fn peak_rings() -> SurfaceOfRevolution {
-    let peak_func = HeightFunction1D::new(double_peak);
-    SurfaceOfRevolution::new(Box::new(peak_func), DistanceMetric::Chessboard)
+    let peak_func = HeightFunction1D::new(double_peak).to_box();
+    SurfaceOfRevolution::new(peak_func, DistanceMetric::Chessboard)
 }
 
 fn hill(x: f64) -> f64 {
@@ -39,36 +44,45 @@ fn hill(x: f64) -> f64 {
 }
 
 fn peak_thing() -> ProductSurface {
-    let peak_func = double_peak;
-    let hill_func = hill;
+    let peak_func = HeightFunction1D::new(double_peak).to_box();
+    let hill_func = HeightFunction1D::new(hill).to_box();
 
     ProductSurface::new(peak_func, hill_func)
 }
 
 fn quad_peak() -> ProductSurface {
-    ProductSurface::new(double_peak, double_peak)
+    let peak_func = HeightFunction1D::new(double_peak).to_box();
+    let peak_func2 = HeightFunction1D::new(double_peak).to_box();
+    ProductSurface::new(peak_func, peak_func2)
 }
 
 fn nine_peak() -> ProductSurface {
-    ProductSurface::new(triple_peak, triple_peak)
+    let peak_func = HeightFunction1D::new(triple_peak).to_box();
+    let peak_func2 = HeightFunction1D::new(triple_peak).to_box();
+    ProductSurface::new(peak_func, peak_func2)
 }
 
 fn nine_tines() -> ProductSurface {
-    ProductSurface::new(fork, fork)
+    ProductSurface::new(fork().to_box(), fork().to_box())
+}
+
+fn nine_tines_inv() -> Complement2D {
+    Complement2D::new(nine_tines().to_box())
 }
 
 pub fn select_model(name: &str) -> Box<dyn Height2D> {
     match name {
-        "crater_hill" => Box::new(crater_hill()),
-        "crater_diamond" => Box::new(crater_diamond()),
-        "step_hill" => Box::new(step_hill()),
-        "sinc_box" => Box::new(sinc_box()),
-        "sine_hill" => Box::new(SineHill::new()),
-        "peak_rings" => Box::new(peak_rings()),
-        "peak_thing" => Box::new(peak_thing()),
-        "quad_peak" => Box::new(quad_peak()),
-        "nine_peak" => Box::new(nine_peak()),
-        "nine_tines" => Box::new(nine_tines()),
+        "crater_hill" => crater_hill().to_box(),
+        "crater_diamond" => crater_diamond().to_box(),
+        "step_hill" => step_hill().to_box(),
+        "sinc_box" => sinc_box().to_box(),
+        "sine_hill" => SineHill::new().to_box(),
+        "peak_rings" => peak_rings().to_box(),
+        "peak_thing" => peak_thing().to_box(),
+        "quad_peak" => quad_peak().to_box(),
+        "nine_peak" => nine_peak().to_box(),
+        "nine_tines" => nine_tines().to_box(),
+        "nine_tines_inv" => nine_tines_inv().to_box(),
         _ => panic!("valid models: crater_hill, step_hill, sinc_box")
     }
 }
@@ -141,16 +155,11 @@ fn triple_peak(x: f64) -> f64 {
     1.2 * (D * peak(x - A, N) + E * peak(x - B, N) + D * peak(x - C, N))
 }
 
-fn fork(x: f64) -> f64 {
-    const N1: f64 = 3.0;
-    const N2: f64 = 8.0;
-    const X1: f64 = 0.1;
-    const X2: f64 = 0.5;
-    const X3: f64 = 0.9;
+fn fork() -> Union1D {
+    let peak1 = Linear1D::new(get_primitive("peak"), 4.0, 0.0, 0.9, 0.0);
+    let peak2 = Linear1D::new(get_primitive("peak"), 4.0, -4.0, 0.9, 0.0);
+    let peak3 = Linear1D::new(get_primitive("peak"), 8.0, -4.0, 0.75, 0.0);
 
-    let f1 = peak(x - X1, N1);
-    let f2 = peak(x - X2, N2);
-    let f3 = peak(x - X3, N1);
-    
-    f1.max(f2).max(f3)
+    Union1D::many(
+        vec![peak1.to_box(), peak2.to_box(), peak3.to_box()])
 }
