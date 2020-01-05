@@ -3,33 +3,33 @@ use crate::surfaces::{
     SurfaceOfRevolution, 
     DistanceMetric, 
     SineHill, 
-    HeightFunction,
     ProductSurface,
 };
+use crate::height1d::HeightFunction1D;
 use crate::polynomial::Polynomial;
 
 fn crater_hill() -> SurfaceOfRevolution {
-    let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]);
-    SurfaceOfRevolution::new(Box::new(poly), DistanceMetric::Euclidean)
+    let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]).to_box();
+    SurfaceOfRevolution::new(poly, DistanceMetric::Euclidean)
 }
 
 fn crater_diamond() -> SurfaceOfRevolution {
-    let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]);
-    SurfaceOfRevolution::new(Box::new(poly), DistanceMetric::Manhattan)
+    let poly = Polynomial::new(vec![0.5, -1.4, 6.7, -5.5]).to_box();
+    SurfaceOfRevolution::new(poly, DistanceMetric::Manhattan)
 }
 
 fn step_hill() -> SurfaceOfRevolution {
-    let step_func = HeightFunction::new(steps);
+    let step_func = HeightFunction1D::new(steps);
     SurfaceOfRevolution::new(Box::new(step_func), DistanceMetric::Euclidean)
 }
 
 fn sinc_box() -> SurfaceOfRevolution {
-    let sinc_func = HeightFunction::new(sinc);
+    let sinc_func = HeightFunction1D::new(sinc);
     SurfaceOfRevolution::new(Box::new(sinc_func), DistanceMetric::Chessboard)
 }
 
 fn peak_rings() -> SurfaceOfRevolution {
-    let peak_func = HeightFunction::new(double_peak);
+    let peak_func = HeightFunction1D::new(double_peak);
     SurfaceOfRevolution::new(Box::new(peak_func), DistanceMetric::Chessboard)
 }
 

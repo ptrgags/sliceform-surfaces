@@ -1,10 +1,14 @@
+#[macro_use]
+mod macros;
+
+mod heights;
+mod height1d;
+mod models;
 mod polylines;
 mod polynomial;
 mod printer;
 mod slicer;
 mod surfaces;
-mod heights;
-mod models;
 mod preview;
 mod geom;
 mod mesh;

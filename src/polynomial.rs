@@ -8,6 +8,8 @@ impl Polynomial {
     pub fn new(coefficients: Vec<f64>) -> Self {
         Self { coefficients }
     }
+
+    to_box!(Height1D);
 }
 
 impl Height1D for Polynomial {

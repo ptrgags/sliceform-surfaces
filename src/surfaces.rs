@@ -68,24 +68,6 @@ impl Height2D for SineHill {
 
 type HeightFn = fn(f64) -> f64;
 
-pub struct HeightFunction {
-    height: HeightFn
-}
-
-impl HeightFunction {
-    pub fn new(height: HeightFn) -> Self {
-        Self {
-            height
-        }
-    }
-}
-
-impl Height1D for HeightFunction {
-    fn compute(&self, x: f64) -> f64 {
-        (self.height)(x)
-    }
-}
-
 pub struct ProductSurface {
     x_func: HeightFn,
     y_func: HeightFn,
